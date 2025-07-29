@@ -1,0 +1,9 @@
+*.hex
+*.bin
+*.dbg
+*.lst
+*.lst.short
+*.mac
+*.opl_*
+*.opk
+*.rom
