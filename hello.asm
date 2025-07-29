@@ -22,9 +22,6 @@ xx:
 	.BYTE	$80
 	.WORD	%prgend-%root	; Size of code
 
-.OVER prgstart
-.EOVER
-
 .OVER root
 
 start:
