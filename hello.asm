@@ -55,9 +55,6 @@ install:
 install_msg:
 	.ASCIC	"Install vector"
 
-len_str:
-	.ASCII	"xxxxxxxx"
-
 remove:
 	ldaa	#$0C		; Clear screen
 	os	dp$emit
