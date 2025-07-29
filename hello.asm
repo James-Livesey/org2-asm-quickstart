@@ -33,7 +33,7 @@ start:
 
 vec:
 	.WORD	install
-	.WORD	$ABCD
+	.WORD	remove
 endvec:
 
 install:
@@ -56,7 +56,7 @@ remove:
 	ldaa	#$0C		; Clear screen
 	os	dp$emit
 
-	ladb	remove_msg	; Print remove message to screen
+	ldab	remove_msg	; Print remove message to screen
 	ldx	#remove_msg+1
 	os	dp$prnt
 
