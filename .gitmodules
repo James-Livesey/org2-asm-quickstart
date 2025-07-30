@@ -1,6 +1,3 @@
 [submodule "toolchain/Psiora"]
 	path = toolchain/Psiora
 	url = https://github.com/James-Livesey/Psiora.git
-[submodule "toolchain/psion-org2-assembler"]
-	path = toolchain/psion-org2-assembler
-	url = https://github.com/blackjetrock/psion-org2-assembler.git
