@@ -1,9 +1,9 @@
 {
     "files.associations": {
-        "*.asm": "plaintext",
-        "*.inc": "plaintext"
+        "*.asm": "platformio-debug.asm",
+        "*.inc": "platformio-debug.asm"
     },
-    "[plaintext]": {
+    "[platformio-debug.asm][plaintext]": {
         "editor.tabSize": 8,
         "editor.insertSpaces": false
     }
