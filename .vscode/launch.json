@@ -1,0 +1,11 @@
+{
+    "version": "0.2.",
+    "configurations": [
+        {
+            "name": "Test assembly code in Psiora emulator",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "./build.sh ${file} --test; exit"
+        }
+    ]
+}

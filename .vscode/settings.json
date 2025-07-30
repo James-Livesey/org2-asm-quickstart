@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.asm": "plaintext",
+        "*.inc": "plaintext"
+    },
+    "[plaintext]": {
+        "editor.tabSize": 8,
+        "editor.insertSpaces": false
+    }
+}
