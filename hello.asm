@@ -36,6 +36,10 @@ vec:
 	.WORD	remove
 endvec:
 
+item:
+	.ASCIC	"HELLO"
+	.WORD	main
+
 install:
 	ldaa	#$0C		; Clear screen
 	os	dp$emit
@@ -43,6 +47,16 @@ install:
 	ldab	install_msg	; Print install message to screen
 	ldx	#install_msg+1
 	os	dp$prnt
+
+	clra			; Clear high byte of D for menu item length
+	ldab	item		; Set low byte of D to length of item name
+	addb	#3		; Increase length to include address pointer
+	std	utw_s0		; Store length in general word variable
+	ldx	#item
+	ldd	#rtb_bl
+	os	ut$cpyb		; Copy item to runtime buffer, length utw_s0
+	ldab	#0		; Position in menu ($FF for end)
+	os	tl$addi		; Add item to main menu
 
 	os	kb$getk		; Wait for keypress
 
@@ -60,6 +74,9 @@ remove:
 	ldx	#remove_msg+1
 	os	dp$prnt
 
+	ldx	#item		; Remove item from main menu
+	os	tl$deli
+
 	os	kb$getk		; Wait for keypress
 
 	clc			; Return success signal
@@ -67,6 +84,21 @@ remove:
 
 remove_msg:
 	.ASCIC	"Remove vector"
+
+main:
+	ldaa	#$0C		; Clear screen
+	os	dp$emit
+
+	ldab	hello_msg	; Print hello message to screen
+	ldx	#hello_msg+1
+	os	dp$prnt
+
+	os	kb$getk		; Wait for keypress
+
+	rts			; Exit main program
+
+hello_msg:
+	.ASCIC	"Hello, world!"
 
 .EOVER
 
