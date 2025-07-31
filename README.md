@@ -7,3 +7,8 @@ To install the dependencies required for the toolchain, assembler and emulator, 
 ```bash
 sudo apt install wget python3 tcl libsdl2-dev qtbase5-dev qt5-qmake cmake
 ```
+
+## Assembling
+To assemble a program into the .OPK datapack format, run `./build.sh $FILE`, where `$FILE` is the file containing the code you want to assemble.
+
+To assemble a program and start the emulator, run `./build.sh $FILE --test`.
