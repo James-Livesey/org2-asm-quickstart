@@ -6,7 +6,7 @@ FILE=${1:-main}
 BIN_FILE=${FILE%.*}.bin
 OPK_FILE=${FILE%.*}.opk
 
-if [ ! -d toolchain/psion-org2-assembler ]; then
+if [ ! -f toolchain/psion-org2-assembler/README.md ]; then
     git submodule update --init --recursive --remote
 fi
 
