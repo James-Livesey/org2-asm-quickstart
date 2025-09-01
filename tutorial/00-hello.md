@@ -10,9 +10,9 @@ The Organiser II's system software resides in read-only memory (ROM), which is m
 
 Since there is no memory protection, an application can write to anywhere in RAM. (However, it can't write to ROM, as ROM is read-only.) This means that if there is an addressing-related bug in your code, your code may end up overwriting RAM and corrupting it. Remember that aside from datapacks, the Organiser II uses RAM as its primary place to store files, so ensure that all your files are backed up before attempting to run your own code.
 
-There may be times where your code causes the Organiser II to crash or get into an infinite loop, which means removing the battery. When you do this, you'll lose all the files stored in RAM. Even more reason to back up your files!
+There may be times where your code causes the Organiser II to crash or get into an infinite loop, which means removing the battery. When you do this, you'll lose all the files stored in RAM. Even more reason to back up your files! Luckily, the emulator — which we'll be using here for development purposes — is much less risky to experiment with.
 
-Luckily, the emulator — which we'll be using here for development purposes — is much less risky to experiment with.
+It's worth familiarising yourself with the instruction set we'll be using. It's relatively simple as there aren't that many instructions. The [MC6801/03 Instruction Set Summary](https://cdn.hackaday.io/files/1776067598695104/MC6801-6803%20INSTRUCTION%20SET%20SUMMARY.pdf) is worth a read — it's not the same CPU as the HD6303 the Organiser II uses, but there is significant overlap in the instruction set.
 
 ## Let's get cracking
 Create a new file in this repository, and give it a name that ends with `.asm`. Visual Studio Code is recommended here, as this repository is set up to enable you to press <kbd>F5</kbd> to easily run your code in an emulator.
@@ -63,9 +63,9 @@ The first byte — `$6A` — tells the Organiser II that this datapck is bootabl
 ## Writing our relocatable code
 The Organiser II's operating system is very clever for its time — it allows you to have more than one application loaded into memory at once; up to three, in fact (corresponding to the two datapack slots, and the top slot connector, which acts as a special datapack slot).
 
-To achieve this, the operating system may load applications _anywhere_ into memory, depending on what other applications are loaded. However, application code must be designed to allow the operating system to modify it so that all the absolute addresses can be 'fixed up' to reference data in wherever the application is loaded. This is achieved using Psion's relocatable format.
+To achieve this, the operating system may load applications _anywhere_ into memory, depending on the model of Organiser II, and what other devices/applications are loaded. However, application code must be designed to allow the operating system to modify it so that all the absolute addresses can be 'fixed up' to reference data in wherever the application is loaded. This is achieved using Psion's relocatable format.
 
-The actual magic happens when we get to `.OVER root`: this defines an _overlay_, called `root`. In practice, `.OVER` outputs some extra metadata that tells the Organiser II's operating system which bytes in the machine code to modify in order to ensure that all the addresses are 'fixed up' after the code is loaded from the datapack into RAM. An _overlay_ is essentially a single unit of code that is relocatable.
+The actual magic happens when we get to `.OVER root`: this defines an _overlay_, called `root`. In practice, `.OVER` outputs [some extra metadata](https://www.jaapsch.net/psion/tech11.htm#p11.1.2) that tells the Organiser II's operating system which bytes in the machine code to modify in order to ensure that all the addresses are 'fixed up' after the code is loaded from the datapack into RAM. An _overlay_ is essentially a single unit of code that is meant to be relocatable.
 
 This is where the `.ORG` line from earlier comes in — the offset in use is sufficiently large (`$241B`) to ensure that all machine code instructions use addresses that are two bytes long, and thus are easily modifiable by the operating system.
 
@@ -98,7 +98,7 @@ This is the very first part of our application code that resides within our `roo
 
 The key bit — which I believe is the only bit that really matters to the Organiser II — is the `.BYTE (endvec-vec)/2`. This defines the number of _vectors_ we'll be using in our program.
 
-Some of you may be wondering what a _vector_ is. A _vector_ is a word (so two bytes) that contains the memory address of some executable code. When the system _jumps_ to a vector, it essentially means that it is going to run the code at the address the vector points to.
+Some of you may be wondering what a _vector_ is. A _vector_ is a word (so two bytes) that contains the memory address of some executable code. When the system _jumps_ to a vector, it means that the CPU is going to run the code at the address the vector points to.
 
 Here we're defining some vectors:
 
@@ -141,9 +141,38 @@ install_msg:
 
 This is the first bit of code we're writing now that is execually a bunch of executable instructions. Let's break it down.
 
-1.
-    `ldaa #$0C` followed by `os dp$emit` clears the screen. Here, we're loading in to the CPU's A register the value `#$0C`. `#$0C` is the ASCII code used to clear a terminal's screen.
+1.	`ldaa #$0C` followed by `os dp$emit` clears the screen. Here, we're loading in to the CPU's A register the value `#$0C`. `#$0C` is the ASCII code used to clear a terminal's screen.
 
-    It's important to include the `#` before the `$`, as without it, `$0C` will cause the CPU to attempt to read the value at address `$0C` and load it into A, whereas we want to tell the CPU that _this_ is the value we want to load.
+	It's important to include the `#` before the `$`, as without it, `$0C` will cause the CPU to attempt to read the value at address `$0C` and load it into A, whereas we want to tell the CPU using `#` that _this_ is the _immediate_ value we want to load.
 
-    `os dp$emit` calls a _system vector_ that reads the single byte in the A register and writes it to the screen. A _system vector_ is a vector that points to code in ROM, and in this case, does the complex task of talking to the display controller for us.
+	`os dp$emit` calls a _system vector_ that reads the single byte in the A register and writes it to the screen. A _system vector_ is a vector that points to code in ROM, and in this case, does the complex task of talking to the display controller for us. You'll find that `dp$emit` is a word that's defined in `MSWI.INC`.
+
+2.	`ldab install_msg` and `ldx #install_msg+1` loads the size and address, respectively, of the message we want to print out. At `install_msg`, `.ASCIC` defines a length-prefixed string, also known as a Pascal string, where the first byte contains the length of the string, and the subsequent bytes are the characters of the string itself. This is handy as `ldab install_msg` loads the first byte from `install_msg` into the B register, which is the string's length. We then load the string's into the X register, offset by 1 to skip over the length byte, using `ldx #install_msg+1`.
+
+3.	`os dp$prnt` then calls a system vector that prints out a string onto the display. Here, it expects the length of the string to be in the B register, and the address of the first character in the X register, as we have already done.
+
+4.	`os kb$getk` calls a system vector that waits for the user to press a key before returning. The key code of the key pressed will then be stored in the B register, but we don't care about that for now.
+
+5.	`clc` and `rts` finish off our _install_ vector's code by first clearing the carry bit in the _condition code register_ using `clc`, to send a success signal to the system, and then returning back to the operating system with `rts` (which is the _return from subroutine_ instruction).
+
+It's now your turn to also write code for the _remove_ vector (`remove:`) to print a different message.
+
+## Let's try it out
+It's now time to assemble the code you've written so far. To do this in Visual Studio Code, simply press <kbd>F5</kbd>. Otherwise, run `./build.sh $FILE --test`, where `$FILE` is the filename of the `.asm` file you're working on.
+
+This will run the assembler, and then start the emulator. If there are problems when assembling your code, the assembler will inform you of any syntax errors that might be present. If everything goes to plan, you should see `Install vector` appear on the display after Psion's copyright message goes away. Press any key, and you should be taken to the main menu. We haven't written any code to add an item to the main menu yet, so you'll just see the default list of applications for now.
+
+You can also test the code you wrote for the _remove_ vector while you're in the emulator by selecting **Datapacks**, then **Slot B**, then **Eject**. On the main menu, once you press <kbd>F1</kbd> (the emulator's mapping of the <kbd>ON</kbd> key), the _remove_ vector will be called, displaying your `Remove vector` message, before your code is unloaded from RAM by the operating system.
+
+## A quick word on registers
+We've been diving into writing assembly code so far without too much knowledge of the CPU itself. It's important to understand some specific details of the CPU in order to begin writing programs of our own. The CPU has 7 logical registers present: our 8-bit _accumulators_ **A** and **B**, our 16-bit _double accumulator_ **D**, _index register_ **X**, _stack pointer_ **SP** and _program counter_ **PC**, and our 8-bit _condition code register_ **CCR**. Let's go through them:
+
+* **A** can hold an 8-bit byte, and is used for general-purpose data, such as adding numbers.
+* **B** is used for the same purpose as **A**.
+* **D** holds a 16-bit word, and is the same register storage area that is used for **A** and **B**. Here, **A** is stored as the high byte of **D**, and **B** is stored as the low byte of **D**. This means that if we store `$12` in **A** and `$34` in **B**, **D** will contain `$1234` as a result. Similarly, if we store `$5678` in **D**, **A** will become `$56`, and **B** `$78`.
+* **X** holds a 16-bit word, and is usually used to store addresses. However, it can be used for general-purpose storage when **D** is already in use — but note that there won't be any instructions to directly perform arithmetic operations on **X**, unlike with **D**.
+* **SP** holds the 16-bit address of the top of the _stack_, used to track the order in which subroutines are called so that `rts` returns to the previous subroutine. It's best not to fiddle with this unless you know what you're doing.
+* **PC** holds the 16-bit address of the next instruction to execute.
+* **CCR** is an 8-bit register that contains flags which may be set or unset, depending on the instructions executed. For example, its least significant bit will be set if `add` results in an integer overflow.
+
+You don't have as many registers to work with compared to that of an x86 CPU, but it's enough to be able to write useful programs with little difficulty. You will just need to  load and store data to and from RAM more frequently.
