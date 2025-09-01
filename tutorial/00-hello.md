@@ -58,7 +58,7 @@ xx:
 
 Each `.BYTE` tells the assembler to simply write a single byte to the final file we'll run, so that helps us to define our header. `.WORD` does the same, except it outputs a _word_ (two bytes) instead. `.ASCII` outputs a string. Here, we're not writing executable code yet — only raw data that the Organiser II will read when trying to load our program.
 
-The first byte — `$6A` — tells the Organiser II that this datapck is bootable. All the rest of the bytes in the header more-or-less match what would be seen at the start of a general-purpose datapack.
+The first byte — `$6A` — tells the Organiser II that this datapack is bootable. All the rest of the bytes in the header more-or-less match what would be seen at the start of a general-purpose datapack.
 
 ## Writing our relocatable code
 The Organiser II's operating system is very clever for its time — it allows you to have more than one application loaded into memory at once; up to three, in fact (corresponding to the two datapack slots, and the top slot connector, which acts as a special datapack slot).
@@ -160,7 +160,7 @@ It's now your turn to also write code for the _remove_ vector (`remove:`) to pri
 ## Let's try it out
 It's now time to assemble the code you've written so far. To do this in Visual Studio Code, simply press <kbd>F5</kbd>. Otherwise, run `./build.sh $FILE --test`, where `$FILE` is the filename of the `.asm` file you're working on.
 
-This will run the assembler, and then start the emulator. If there are problems when assembling your code, the assembler will inform you of any syntax errors that might be present. If everything goes to plan, you should see `Install vector` appear on the display after Psion's copyright message goes away. Press any key, and you should be taken to the main menu. We haven't written any code to add an item to the main menu yet, so you'll just see the default list of applications for now.
+This will run the assembler, convert the raw binary file for the datapack into a `.opk` file used by emulators, and then start the emulator with this `.opk` file loaded. If there are problems when assembling your code, the assembler will inform you of any syntax errors that might be present. If everything goes to plan, you should see `Install vector` appear on the display after Psion's copyright message goes away. Press any key, and you should be taken to the main menu. We haven't written any code to add an item to the main menu yet, so you'll just see the default list of applications for now.
 
 You can also test the code you wrote for the _remove_ vector while you're in the emulator by selecting **Datapacks**, then **Slot B**, then **Eject**. On the main menu, once you press <kbd>F1</kbd> (the emulator's mapping of the <kbd>ON</kbd> key), the _remove_ vector will be called, displaying your `Remove vector` message, before your code is unloaded from RAM by the operating system.
 
@@ -175,4 +175,4 @@ We've been diving into writing assembly code so far without too much knowledge o
 * **PC** holds the 16-bit address of the next instruction to execute.
 * **CCR** is an 8-bit register that contains flags which may be set or unset, depending on the instructions executed. For example, its least significant bit will be set if `add` results in an integer overflow.
 
-You don't have as many registers to work with compared to that of an x86 CPU, but it's enough to be able to write useful programs with little difficulty. You will just need to  load and store data to and from RAM more frequently.
+Once again, the [MC6801/03 Instruction Set Summary](https://cdn.hackaday.io/files/1776067598695104/MC6801-6803%20INSTRUCTION%20SET%20SUMMARY.pdf) gives a good overview of the registers in use. You don't have as many registers to work with compared to that of an x86 CPU, but it's enough to be able to write useful programs with little difficulty. You will just need to  load and store data to and from RAM more frequently.
