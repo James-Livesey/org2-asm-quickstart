@@ -69,7 +69,7 @@ The actual magic happens when we get to `.OVER root`: this defines an _overlay_,
 
 This is where the `.ORG` line from earlier comes in — the offset in use is sufficiently large (`$241B`) to ensure that all machine code instructions use addresses that are two bytes long, and thus are easily modifiable by the operating system.
 
-To tie it all off, the `.WORD	%root-%xx` from earlier tells the Organiser II where it should expect the relocatable code to be in the datapack (`%root-%xx` refers to the number of bytes after the header), and `.WORD	%prgend-%root` tells the Organiser II how long that code is so that it can copy it to RAM.
+To tie it all off, the `.WORD %root-%xx` from earlier tells the Organiser II where it should expect the relocatable code to be in the datapack (`%root-%xx` refers to the number of bytes after the header), and `.WORD %prgend-%root` tells the Organiser II how long that code is so that it can copy it to RAM.
 
 Before we forget, add the following to the bottom of your code, to close off the `root` overlay and mark the end of the program:
 
@@ -115,7 +115,7 @@ remove:
     ; TODO: Write remove vector code
 ```
 
-`.WORD  install` adds the memory address that points to the code at (or will be at) `install:`, and `.WORD  remove` adds the memory address that points to `remove:`. The `.WORD     install` and `.WORD    remove` parts emit vectors that the Organiser II will jump to when the datapack is first installed, and then removed from the system, respectively.
+`.WORD install` adds the memory address that points to the code at (or will be at) `install:`, and `.WORD remove` adds the memory address that points to `remove:`. The `.WORD install` and `.WORD remove` parts emit vectors that the Organiser II will jump to when the datapack is first installed, and then removed from the system, respectively.
 
 These two vectors are useful as they allow us to insert and remove our menu item that the user will select to launch our application.
 
@@ -142,7 +142,7 @@ install_msg:
 This is the first bit of code we're writing now that is execually a bunch of executable instructions. Let's break it down.
 
 1.
-    `ldaa    #$0C` followed by `os   dp$emit` clears the screen. Here, we're loading in to the CPU's A register the value `#$0C`. `#$0C` is the ASCII code used to clear a terminal's screen.
+    `ldaa #$0C` followed by `os dp$emit` clears the screen. Here, we're loading in to the CPU's A register the value `#$0C`. `#$0C` is the ASCII code used to clear a terminal's screen.
 
     It's important to include the `#` before the `$`, as without it, `$0C` will cause the CPU to attempt to read the value at address `$0C` and load it into A, whereas we want to tell the CPU that _this_ is the value we want to load.
 
