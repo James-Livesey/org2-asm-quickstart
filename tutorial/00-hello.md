@@ -141,13 +141,13 @@ install_msg:
 
 This is the first bit of code we're writing now that is actually a bunch of executable instructions. Let's break it down.
 
-1.	`ldaa #$0C` followed by `os dp$emit` clears the screen. Here, we're loading in to the CPU's A register the value `#$0C`. `#$0C` is the ASCII code used to clear a terminal's screen.
+1.	`ldaa #$0C` followed by `os dp$emit` clears the screen. Here, we're loading into the CPU's A register the value `#$0C`. `#$0C` is the ASCII code used to clear a terminal's screen.
 
 	It's important to include the `#` before the `$`, as without it, `$0C` will cause the CPU to attempt to read the value at address `$0C` and load it into A, whereas we want to tell the CPU using `#` that _this_ is the _immediate_ value we want to load.
 
 	`os dp$emit` calls a _system vector_ that reads the single byte in the A register and writes it to the screen. A _system vector_ is a vector that points to code in ROM, and in this case, does the complex task of talking to the display controller for us. You'll find that `dp$emit` is a word that's defined in `MSWI.INC`.
 
-2.	`ldab install_msg` and `ldx #install_msg+1` loads the size and address, respectively, of the message we want to print out. At `install_msg`, `.ASCIC` defines a length-prefixed string, also known as a Pascal string, where the first byte contains the length of the string, and the subsequent bytes are the characters of the string itself. This is handy as `ldab install_msg` loads the first byte from `install_msg` into the B register, which is the string's length. We then load the string's into the X register, offset by 1 to skip over the length byte, using `ldx #install_msg+1`.
+2.	`ldab install_msg` and `ldx #install_msg+1` loads the size and address, respectively, of the message we want to print out. At `install_msg`, `.ASCIC` defines a length-prefixed string, also known as a Pascal string, where the first byte contains the length of the string, and the subsequent bytes are the characters of the string itself. This is handy as `ldab install_msg` loads the first byte from `install_msg` into the B register, which is the string's length. We then load the string's address into the X register, offset by 1 to skip over the length byte, using `ldx #install_msg+1`.
 
 3.	`os dp$prnt` then calls a system vector that prints out a string onto the display. Here, it expects the length of the string to be in the B register, and the address of the first character in the X register, as we have already done.
 
