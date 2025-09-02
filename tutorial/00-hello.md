@@ -117,7 +117,7 @@ remove:
 
 `.WORD install` adds the memory address that points to the code at (or will be at) `install:`, and `.WORD remove` adds the memory address that points to `remove:`. The `.WORD install` and `.WORD remove` parts emit vectors that the Organiser II will jump to when the datapack is first installed, and then removed from the system, respectively.
 
-These two vectors are useful as they allow us to insert and remove our menu item that the user will select to launch our application.
+These two vectors are useful as they will later be used to allow us to insert and remove our menu item that the user will select to launch our application.
 
 Let's start writing the installation code first, by getting it to simply print something to the screen. Modify `install:` to be:
 
@@ -139,7 +139,7 @@ install_msg:
 	.ASCIC	"Install vector"
 ```
 
-This is the first bit of code we're writing now that is execually a bunch of executable instructions. Let's break it down.
+This is the first bit of code we're writing now that is actually a bunch of executable instructions. Let's break it down.
 
 1.	`ldaa #$0C` followed by `os dp$emit` clears the screen. Here, we're loading in to the CPU's A register the value `#$0C`. `#$0C` is the ASCII code used to clear a terminal's screen.
 
