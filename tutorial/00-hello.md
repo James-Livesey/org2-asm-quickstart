@@ -65,7 +65,13 @@ The Organiser II's operating system is very clever for its time — it allows yo
 
 To achieve this, the operating system may load applications _anywhere_ into memory, depending on the model of Organiser II, and what other devices/applications are loaded. However, application code must be designed to allow the operating system to modify it so that all the absolute addresses can be 'fixed up' to reference data in wherever the application is loaded. This is achieved using Psion's relocatable format.
 
-The actual magic happens when we get to `.OVER root`: this defines an _overlay_, called `root`. In practice, `.OVER` outputs [some extra metadata](https://www.jaapsch.net/psion/tech11.htm#p11.1.2) that tells the Organiser II's operating system which bytes in the machine code to modify in order to ensure that all the addresses are 'fixed up' after the code is loaded from the datapack into RAM. An _overlay_ is essentially a single unit of code that is meant to be relocatable.
+The actual magic happens with our next line of code:
+
+```
+.OVER root
+```
+
+`.OVER root` defines an _overlay_, called `root`. In practice, `.OVER` outputs [some extra metadata](https://www.jaapsch.net/psion/tech11.htm#p11.1.2), as part of the relocatable format, that tells the Organiser II's operating system which bytes in the machine code to modify in order to ensure that all the addresses are 'fixed up' after the code is loaded from the datapack into RAM. An _overlay_ is essentially a single unit of code that is meant to be relocatable.
 
 This is where the `.ORG` line from earlier comes in — the offset in use is sufficiently large (`$241B`) to ensure that all machine code instructions use addresses that are two bytes long, and thus are easily modifiable by the operating system.
 
